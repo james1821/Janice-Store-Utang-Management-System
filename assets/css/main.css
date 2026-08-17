@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #__nuxt {
+  height: 100%;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+html.dark,
+html.dark body {
+  background-color: #0f172a;
+}
+
+/* Native <input type="date"> renders its calendar icon black by default,
+   which is unreadable against our dark inputs. Telling the browser the
+   input uses a dark color scheme makes it draw a light-colored icon instead. */
+html.dark input[type='date'] {
+  color-scheme: dark;
+}

@@ -1,0 +1,51 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Replace this with your admin account's UID (Firebase Console > Authentication),
+    // the same value you put in NUXT_PUBLIC_ADMIN_UID.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == "idhrgItqANQrmp635O0Iiq93ShM2";
+    }
+
+    // True if the given person has turned on their public read-only share link/QR,
+    // and it hasn't passed its 24-hour expiry yet.
+    function isSharedPerson(personId) {
+      let p = get(/databases/$(database)/documents/people/$(personId)).data;
+      return exists(/databases/$(database)/documents/people/$(personId)) &&
+        p.shareEnabled == true &&
+        p.shareEnabledAt is number &&
+        request.time.toMillis() < p.shareEnabledAt + 86400000;
+    }
+
+    match /people/{personId} {
+      allow get: if isAdmin() || (
+        resource.data.shareEnabled == true &&
+        resource.data.shareEnabledAt is number &&
+        request.time.toMillis() < resource.data.shareEnabledAt + 86400000
+      );
+      allow list: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /utangs/{utangId} {
+      allow read: if isAdmin() || isSharedPerson(resource.data.personId);
+      allow write: if isAdmin();
+    }
+
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || isSharedPerson(resource.data.personId);
+      allow write: if isAdmin();
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
