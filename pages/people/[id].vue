@@ -33,42 +33,73 @@
             </div>
           </div>
         </div>
-        <button @click="openEditPerson" class="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 shrink-0 lg:mt-3">
-          <Pencil :size="14" /> Edit
-        </button>
       </div>
 
       <div
-        v-if="hasContactInfo"
-        class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700 overflow-hidden"
+        class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
       >
-        <div v-if="person.phoneNumber" class="flex items-center gap-3 px-4 py-3">
-          <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
-            <Phone :size="16" />
+        <button
+          type="button"
+          @click="showContactInfo = !showContactInfo"
+          class="w-full flex items-center justify-between gap-3 px-4 py-3 text-left active:bg-slate-50 dark:active:bg-slate-700/50"
+          :aria-expanded="showContactInfo"
+        >
+          <span class="flex items-center gap-3 min-w-0">
+            <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
+              <Contact :size="16" />
+            </span>
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">Contact information</span>
           </span>
-          <div class="min-w-0">
-            <p class="text-[11px] text-slate-400 dark:text-slate-500">Phone</p>
-            <p class="text-sm font-medium dark:text-slate-100 truncate">{{ person.phoneNumber }}</p>
+          <ChevronDown
+            :size="16"
+            class="text-slate-400 dark:text-slate-500 shrink-0 transition-transform duration-200"
+            :class="showContactInfo ? 'rotate-180' : ''"
+          />
+        </button>
+        <div
+          v-show="showContactInfo"
+          class="border-t border-slate-100 dark:border-slate-700"
+        >
+          <div class="divide-y divide-slate-100 dark:divide-slate-700">
+            <div v-if="person.phoneNumber" class="flex items-center gap-3 px-4 py-3">
+              <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
+                <Phone :size="16" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">Phone</p>
+                <p class="text-sm font-medium dark:text-slate-100 truncate">{{ person.phoneNumber }}</p>
+              </div>
+            </div>
+            <div v-if="person.gcashName || person.gcashNumber" class="flex items-center gap-3 px-4 py-3">
+              <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
+                <Wallet :size="16" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">GCash</p>
+                <p class="text-sm font-medium dark:text-slate-100 truncate">
+                  {{ person.gcashName }}<span v-if="person.gcashName && person.gcashNumber"> · </span>{{ person.gcashNumber }}
+                </p>
+              </div>
+            </div>
+            <div v-if="person.address" class="flex items-center gap-3 px-4 py-3">
+              <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
+                <MapPin :size="16" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-[11px] text-slate-400 dark:text-slate-500">Address</p>
+                <p class="text-sm font-medium dark:text-slate-100 truncate">{{ person.address }}</p>
+              </div>
+            </div>
+            <p v-if="!hasContactInfo" class="px-4 py-3 text-sm text-slate-400 dark:text-slate-500">No contact details added yet.</p>
           </div>
-        </div>
-        <div v-if="person.gcashName || person.gcashNumber" class="flex items-center gap-3 px-4 py-3">
-          <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
-            <Wallet :size="16" />
-          </span>
-          <div class="min-w-0">
-            <p class="text-[11px] text-slate-400 dark:text-slate-500">GCash</p>
-            <p class="text-sm font-medium dark:text-slate-100 truncate">
-              {{ person.gcashName }}<span v-if="person.gcashName && person.gcashNumber"> · </span>{{ person.gcashNumber }}
-            </p>
-          </div>
-        </div>
-        <div v-if="person.address" class="flex items-center gap-3 px-4 py-3">
-          <span class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
-            <MapPin :size="16" />
-          </span>
-          <div class="min-w-0">
-            <p class="text-[11px] text-slate-400 dark:text-slate-500">Address</p>
-            <p class="text-sm font-medium dark:text-slate-100 truncate">{{ person.address }}</p>
+          <div class="px-4 pb-3">
+            <button
+              type="button"
+              @click="openEditPerson"
+              class="w-full flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 text-sm font-semibold py-2.5 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700"
+            >
+              <Pencil :size="15" /> Edit customer
+            </button>
           </div>
         </div>
       </div>
@@ -252,7 +283,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, User, Star, Pencil, Phone, Wallet, MapPin, Plus, FileDown, QrCode, CalendarClock, Trash2, Clock, ArrowDownWideNarrow, ArrowUpWideNarrow } from 'lucide-vue-next'
+import { ArrowLeft, User, Star, Pencil, Phone, Wallet, MapPin, Plus, FileDown, QrCode, CalendarClock, Trash2, Clock, ArrowDownWideNarrow, ArrowUpWideNarrow, Contact, ChevronDown } from 'lucide-vue-next'
 import type { Utang } from '~/types'
 
 definePageMeta({ layout: 'default' })
@@ -289,6 +320,7 @@ const personPayments = paymentsForPerson(personId)
 const outstandingTotal = outstandingForPerson(personId)
 
 const hasContactInfo = computed(() => !!(person.value?.phoneNumber || person.value?.gcashName || person.value?.gcashNumber || person.value?.address))
+const showContactInfo = ref(false)
 
 function interestAmount(u: Utang) {
   return calculateAccruedInterest(u)
