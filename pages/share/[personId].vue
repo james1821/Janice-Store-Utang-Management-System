@@ -115,6 +115,10 @@ const personId = route.params.personId as string
 const { person, utangs, payments, loading, notFound, load } = usePublicShare()
 const { formatCurrency, formatDateTime, formatDate, getOutstandingBalance, calculateAccruedInterest, getDueStatus, groupByDateLabel } = useUtangCalc()
 
+useHead({
+  title: () => (person.value ? `${person.value.fullName} Payment history` : 'Payment history')
+})
+
 onMounted(() => {
   load(personId)
 })
