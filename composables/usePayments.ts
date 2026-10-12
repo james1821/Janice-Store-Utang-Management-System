@@ -1,4 +1,4 @@
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore'
+import { collection, doc, addDoc, deleteDoc, onSnapshot, query, orderBy } from 'firebase/firestore'
 import type { Payment, Utang } from '~/types'
 import { getOutstandingBalance } from './useUtangCalc'
 import { useUtangs } from './useUtangs'
@@ -50,5 +50,20 @@ export function usePayments() {
     await updateUtangAfterPayment(utang.id, newAmountPaid, newStatus)
   }
 
-  return { payments, init, forPerson, forUtang, recordPayment }
+  /**
+   * Removes a payment and rolls the utang's paid amount/status back to reflect
+   * the remaining payments, so deleting a mistaken entry restores the balance.
+   */
+  async function deletePayment(payment: Payment, utang: Utang) {
+    await deleteDoc(doc($db as any, 'payments', payment.id))
+
+    const remaining = payments.value.filter((p) => p.utangId === utang.id && p.id !== payment.id)
+    const newAmountPaid = +remaining.reduce((sum, p) => sum + p.amount, 0).toFixed(2)
+    const stillOwed = getOutstandingBalance({ ...utang, amountPaid: newAmountPaid })
+    const newStatus: Utang['status'] = stillOwed <= 0 ? 'paid' : newAmountPaid > 0 ? 'partial' : 'unpaid'
+
+    await updateUtangAfterPayment(utang.id, newAmountPaid, newStatus)
+  }
+
+  return { payments, init, forPerson, forUtang, recordPayment, deletePayment }
 }

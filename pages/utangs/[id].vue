@@ -1,6 +1,6 @@
 <template>
   <div v-if="utang && person" class="space-y-5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-start">
-    <button @click="goBack" class="lg:col-span-3 flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+    <button @click="goBack" class="lg:col-span-3 w-fit inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-medium px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-700">
       <ArrowLeft :size="16" /> Back
     </button>
 
@@ -26,7 +26,7 @@
           <span class="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">{{ utang.type }} utang</span>
           <div class="flex items-center gap-2">
             <span class="text-[11px] uppercase font-semibold px-2 py-1 rounded-full" :class="statusClass(utang.status)">{{ utang.status }}</span>
-            <button type="button" @click="showEditUtang = true" class="text-slate-400 dark:text-slate-500 w-7 h-7 flex items-center justify-center rounded-full active:bg-slate-100 dark:active:bg-slate-700 lg:hover:bg-slate-100 lg:dark:hover:bg-slate-700" aria-label="Edit utang">
+            <button type="button" @click="showEditUtang = true" class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-700" aria-label="Edit utang">
               <Pencil :size="15" />
             </button>
           </div>
@@ -39,7 +39,7 @@
           </div>
           <div v-if="hasInterest" class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400">
-              Interest ({{ utang.interestType === 'percentage' ? `${utang.interestValue}%` : formatCurrency(utang.interestValue || 0) }} per {{ utang.interestFrequency }})
+              Interest ({{ utang.interestType === 'percentage' ? `${utang.interestValue}%` : formatCurrency(utang.interestValue || 0) }}) {{ interestFrequencyLabel(utang.interestFrequency) }}
             </span>
             <span class="font-medium text-amber-600 dark:text-amber-400">+ {{ formatCurrency(accruedInterest) }}</span>
           </div>
@@ -75,7 +75,7 @@
       <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><CalendarClock :size="15" /> Due date</span>
-          <button type="button" @click="editingDueDate = !editingDueDate" class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <button type="button" @click="editingDueDate = !editingDueDate" class="rounded-lg border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-xs font-medium px-2.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 active:bg-slate-100 dark:active:bg-slate-700">
             {{ editingDueDate ? 'Cancel' : utang.dueDate ? 'Change' : 'Set date' }}
           </button>
         </div>
@@ -102,7 +102,7 @@
       </div>
 
       <div class="flex gap-2">
-        <button v-if="utang.status !== 'paid'" @click="showPayment = true" class="flex-1 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-semibold py-3 active:opacity-80 lg:hover:opacity-90 flex items-center justify-center gap-1.5">
+        <button v-if="utang.status !== 'paid'" @click="showPayment = true" class="flex-1 rounded-xl bg-emerald-600 text-white text-sm font-semibold py-3 active:opacity-80 lg:hover:opacity-90 flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/30">
           <Banknote :size="16" /> Record payment
         </button>
         <button v-if="utang.status !== 'paid'" @click="confirmMarkPaid = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5">
@@ -121,12 +121,22 @@
         No payments recorded yet{{ utang.status === 'partial' ? ' — balance shown reflects manual adjustments.' : '.' }}
       </div>
       <div v-else class="space-y-2 lg:grid lg:grid-cols-2 lg:gap-2.5 lg:space-y-0">
-        <div v-for="pay in utangPayments" :key="pay.id" class="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3">
-          <div>
+        <div v-for="pay in utangPayments" :key="pay.id" class="flex items-center justify-between gap-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+          <div class="min-w-0">
             <p class="text-sm font-medium dark:text-slate-100">{{ formatCurrency(pay.amount) }}</p>
-            <p class="text-xs text-slate-400 dark:text-slate-500">{{ pay.note || 'Payment' }}</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 truncate">{{ pay.note || 'Payment' }}</p>
           </div>
-          <p class="text-xs text-slate-400 dark:text-slate-500">{{ formatDateTime(pay.createdAt) }}</p>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <p class="text-xs text-slate-400 dark:text-slate-500">{{ formatDateTime(pay.createdAt) }}</p>
+            <button
+              type="button"
+              @click="askDeletePayment(pay)"
+              class="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-600 text-slate-400 dark:text-slate-500 bg-white dark:bg-slate-800 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-200 dark:hover:border-rose-800 active:bg-rose-50 dark:active:bg-rose-900/20"
+              aria-label="Delete payment"
+            >
+              <Trash2 :size="15" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -142,12 +152,22 @@
       danger
       @confirm="doMarkPaid"
     />
+
+    <ConfirmDialog
+      v-model="confirmDeletePayment"
+      title="Delete this payment?"
+      message="This payment will be removed and the outstanding balance will be updated to reflect the remaining payments."
+      confirm-label="Delete"
+      danger
+      @confirm="doDeletePayment"
+    />
   </div>
   <div v-else class="text-center text-slate-400 py-10">Loading…</div>
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, User, ChevronRight, CalendarClock, Banknote, CheckCircle2, Pencil } from 'lucide-vue-next'
+import { ArrowLeft, User, ChevronRight, CalendarClock, Banknote, CheckCircle2, Pencil, Trash2 } from 'lucide-vue-next'
+import type { Payment } from '~/types'
 
 definePageMeta({ layout: 'default' })
 
@@ -157,8 +177,8 @@ const utangId = route.params.id as string
 
 const { getUtang, init: initUtangs, markUtangPaid, updateUtang } = useUtangs()
 const { getPerson, init: initPeople } = usePeople()
-const { init: initPayments, forUtang } = usePayments()
-const { formatCurrency, formatDateTime, formatDate, calculateAccruedInterest, getDueStatus } = useUtangCalc()
+const { init: initPayments, forUtang, deletePayment } = usePayments()
+const { formatCurrency, formatDateTime, formatDate, calculateAccruedInterest, getDueStatus, interestFrequencyLabel } = useUtangCalc()
 const { open: openLightbox } = useLightbox()
 const toast = useToast()
 
@@ -220,6 +240,26 @@ async function saveDueDate() {
 
 // Payment
 const showPayment = ref(false)
+
+// Delete a recorded payment (rolls the utang balance back)
+const confirmDeletePayment = ref(false)
+const paymentToDelete = ref<Payment | null>(null)
+function askDeletePayment(pay: Payment) {
+  paymentToDelete.value = pay
+  confirmDeletePayment.value = true
+}
+async function doDeletePayment() {
+  if (!paymentToDelete.value || !utang.value) return
+  const payment = paymentToDelete.value
+  try {
+    await deletePayment(payment, utang.value)
+    toast.success('Payment deleted')
+  } catch {
+    toast.error('Could not delete payment')
+  } finally {
+    paymentToDelete.value = null
+  }
+}
 
 // Full edit (opens AddUtangModal in edit mode, pre-filled from this utang)
 const showEditUtang = ref(false)

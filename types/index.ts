@@ -1,6 +1,6 @@
 export type UtangType = 'tinda' | 'cash' | 'gcash'
 export type InterestType = 'percentage' | 'fixed'
-export type InterestFrequency = 'day' | 'week' | 'month'
+export type InterestFrequency = 'day' | 'week' | 'month' | 'once'
 
 export interface Person {
   id: string

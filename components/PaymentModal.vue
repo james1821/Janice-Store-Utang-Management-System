@@ -11,7 +11,7 @@
 
       <div>
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Amount to pay (₱)</label>
-        <input v-model.number="amount" type="number" min="0.01" :max="outstanding" step="0.01" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
+        <CurrencyInput v-model="amount" :max="outstanding" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         <button type="button" @click="amount = outstanding" class="text-xs text-emerald-600 dark:text-emerald-400 font-medium mt-1">Pay full amount</button>
       </div>
 

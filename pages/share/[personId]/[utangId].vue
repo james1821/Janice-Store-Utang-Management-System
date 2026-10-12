@@ -28,7 +28,7 @@
           </div>
           <div v-if="hasInterest" class="flex items-center justify-between">
             <span class="text-slate-500 dark:text-slate-400">
-              Interest ({{ utang.interestType === 'percentage' ? `${utang.interestValue}%` : formatCurrency(utang.interestValue || 0) }} per {{ utang.interestFrequency }})
+              Interest ({{ utang.interestType === 'percentage' ? `${utang.interestValue}%` : formatCurrency(utang.interestValue || 0) }}) {{ interestFrequencyLabel(utang.interestFrequency) }}
             </span>
             <span class="font-medium text-amber-600 dark:text-amber-400">+ {{ formatCurrency(accruedInterest) }}</span>
           </div>
@@ -104,7 +104,7 @@ const personId = route.params.personId as string
 const utangId = route.params.utangId as string
 
 const { utangs, payments, loading, notFound, load } = usePublicShare()
-const { formatCurrency, formatDateTime, formatDate, calculateAccruedInterest, getDueStatus } = useUtangCalc()
+const { formatCurrency, formatDateTime, formatDate, calculateAccruedInterest, getDueStatus, interestFrequencyLabel } = useUtangCalc()
 
 onMounted(() => {
   load(personId)

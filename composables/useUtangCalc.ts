@@ -1,12 +1,29 @@
-import type { Utang } from '~/types'
+import type { InterestFrequency, Utang } from '~/types'
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000
 
-function periodsElapsed(createdAt: number, frequency: 'day' | 'week' | 'month'): number {
+function periodsElapsed(createdAt: number, frequency: InterestFrequency): number {
+  if (frequency === 'once') return 1 // flat one-time charge — never grows with time
   const days = Math.floor((Date.now() - createdAt) / MS_PER_DAY)
   if (frequency === 'day') return Math.max(0, days)
   if (frequency === 'week') return Math.max(0, Math.floor(days / 7))
   return Math.max(0, Math.floor(days / 30)) // month approximated as 30 days
+}
+
+/** Human-readable label for an interest frequency; 'once' is a flat one-time charge. */
+export function interestFrequencyLabel(frequency?: InterestFrequency): string {
+  switch (frequency) {
+    case 'day':
+      return 'per day'
+    case 'week':
+      return 'per week'
+    case 'month':
+      return 'per month'
+    case 'once':
+      return 'one-time'
+    default:
+      return ''
+  }
 }
 
 /** Simple (non-compounding) interest, calculated on-demand from elapsed time. Applies to cash and gcash utangs. */
@@ -87,6 +104,7 @@ export function groupByDateLabel<T>(items: T[], getTimestamp: (item: T) => numbe
 export function useUtangCalc() {
   return {
     calculateAccruedInterest,
+    interestFrequencyLabel,
     getOutstandingBalance,
     formatCurrency,
     formatDateTime,

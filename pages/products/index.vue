@@ -97,7 +97,7 @@
         </div>
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Price (₱) *</label>
-          <input v-model.number="form.price" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
+          <CurrencyInput v-model="form.price" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         </div>
         <button type="submit" :disabled="saving" class="w-full rounded-xl bg-emerald-600 text-white font-semibold py-3 mt-2 active:opacity-80 disabled:opacity-50">
           {{ saving ? 'Saving…' : 'Save product' }}
@@ -182,7 +182,7 @@ const showModal = ref(false)
 const saving = ref(false)
 const confirmDelete = ref(false)
 const editingId = ref<string | null>(null)
-const form = reactive({ name: '', price: 0, imageUrl: '' })
+const form = reactive({ name: '', price: 0 as number | undefined, imageUrl: '' })
 
 let stopDraftWatch: (() => void) | null = null
 function draftKey() {
@@ -213,10 +213,10 @@ async function submit() {
   saving.value = true
   try {
     if (editingId.value) {
-      await updateProduct(editingId.value, { ...form })
+      await updateProduct(editingId.value, { ...form, price: form.price ?? 0 })
       toast.success('Product updated')
     } else {
-      await addProduct({ ...form })
+      await addProduct({ ...form, price: form.price ?? 0 })
       toast.success('Product added')
     }
     clear(draftKey())

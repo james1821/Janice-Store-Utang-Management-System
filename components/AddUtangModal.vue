@@ -91,7 +91,7 @@
           <div v-if="showInlineAddProduct" class="border border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl p-3 space-y-2 bg-emerald-50/50 dark:bg-emerald-900/10">
             <ImageUploader v-model="newProduct.imageUrl" :round="false" :size="56" :max-dimension="480" :target-k-b="45" />
             <input v-model="newProduct.name" placeholder="Product name" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
-            <input v-model.number="newProduct.price" type="number" min="0" step="0.01" placeholder="Price (₱)" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
+            <CurrencyInput v-model="newProduct.price" placeholder="Price (₱)" class="w-full rounded-lg border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-3 py-2 text-sm outline-none focus:border-emerald-500" />
             <button
               type="button"
               @click="saveInlineProduct"
@@ -155,7 +155,7 @@
       <form v-else-if="type === 'cash'" @submit.prevent="submitCash" class="flex-1 min-h-0 overflow-y-auto space-y-3 pr-0.5">
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Amount (₱) *</label>
-          <input v-model.number="cash.amount" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
+          <CurrencyInput v-model="cash.amount" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         </div>
         <div class="flex items-center gap-2">
           <input id="hasInterestCash" v-model="cash.hasInterest" type="checkbox" class="w-4 h-4" />
@@ -179,6 +179,7 @@
               <option value="day">Per day</option>
               <option value="week">Per week</option>
               <option value="month">Per month</option>
+              <option value="once">One-time (fixed)</option>
             </select>
           </div>
         </div>
@@ -200,7 +201,7 @@
       <form v-else @submit.prevent="submitGcash" class="flex-1 min-h-0 overflow-y-auto space-y-3 pr-0.5">
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Amount (₱) *</label>
-          <input v-model.number="gcash.amount" type="number" min="0" step="0.01" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
+          <CurrencyInput v-model="gcash.amount" required class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         </div>
         <div>
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">GCash number</label>
@@ -229,6 +230,7 @@
               <option value="day">Per day</option>
               <option value="week">Per week</option>
               <option value="month">Per month</option>
+              <option value="once">One-time (fixed)</option>
             </select>
           </div>
         </div>
@@ -352,7 +354,7 @@ const cash = reactive({
   hasInterest: false,
   interestType: 'percentage' as 'percentage' | 'fixed',
   interestValue: 0,
-  interestFrequency: 'month' as 'day' | 'week' | 'month',
+  interestFrequency: 'month' as 'day' | 'week' | 'month' | 'once',
   note: ''
 })
 const gcash = reactive({
@@ -361,7 +363,7 @@ const gcash = reactive({
   hasInterest: false,
   interestType: 'percentage' as 'percentage' | 'fixed',
   interestValue: 0,
-  interestFrequency: 'month' as 'day' | 'week' | 'month',
+  interestFrequency: 'month' as 'day' | 'week' | 'month' | 'once',
   note: ''
 })
 
