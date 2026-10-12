@@ -6,7 +6,7 @@
           <div
             v-if="modelValue"
             class="bg-white dark:bg-slate-800 w-full sm:max-w-md lg:max-w-xl sm:rounded-2xl rounded-t-2xl flex flex-col"
-            :class="noBodyScroll ? 'max-h-[85vh] overflow-hidden' : 'max-h-[90vh] overflow-y-auto'"
+            :class="noBodyScroll ? 'max-h-[90vh] overflow-hidden' : 'max-h-[90vh] overflow-y-auto'"
           >
             <div class="flex items-center justify-between px-4 lg:px-6 pt-4 lg:pt-5 pb-2 shrink-0 bg-white dark:bg-slate-800">
               <h2 class="font-semibold text-lg lg:text-xl text-slate-900 dark:text-slate-100">{{ title }}</h2>
@@ -14,7 +14,7 @@
                 <X :size="18" />
               </button>
             </div>
-            <div class="px-4 lg:px-6 pb-6" :class="noBodyScroll ? 'flex-1 min-h-0 flex flex-col overflow-hidden' : ''">
+            <div class="px-4 lg:px-6 pb-6" :class="noBodyScroll ? 'flex-1 min-h-0 flex flex-col overflow-y-auto' : ''">
               <slot />
             </div>
           </div>

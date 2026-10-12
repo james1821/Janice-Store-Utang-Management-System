@@ -22,3 +22,44 @@ html.dark body {
 html.dark input[type='date'] {
   color-scheme: dark;
 }
+
+/* Thin, theme-matched scrollbars. Firefox uses scrollbar-width/-color,
+   WebKit (Chrome/Edge/Safari) uses the ::-webkit-scrollbar pseudo-elements. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(203 213 225) transparent; /* slate-300 on transparent */
+}
+
+html.dark * {
+  scrollbar-color: rgb(51 65 85) transparent; /* slate-700 on transparent */
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(203 213 225); /* slate-300 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(148 163 184); /* slate-400 */
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(51 65 85); /* slate-700 */
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(71 85 105); /* slate-600 */
+}

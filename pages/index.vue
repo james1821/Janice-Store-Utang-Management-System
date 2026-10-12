@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-5 lg:space-y-8 lg:flex-1 lg:min-h-0 lg:flex lg:flex-col lg:overflow-hidden">
+  <div class="space-y-5 lg:space-y-4 lg:flex-1 lg:min-h-0 lg:flex lg:flex-col lg:overflow-hidden">
     <!-- Mobile: original stacked summary. Desktop: hidden, replaced by the dashboard header below. -->
     <div class="lg:hidden space-y-5">
       <div>
@@ -42,60 +42,60 @@
     </div>
 
     <!-- Desktop dashboard header -->
-    <div class="hidden lg:block space-y-6 lg:shrink-0">
-      <div class="flex items-start justify-between gap-6">
+    <div class="hidden lg:block space-y-3 lg:shrink-0">
+      <div class="flex items-center justify-between gap-6">
         <div>
-          <h1 class="text-2xl xl:text-3xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
-          <p class="text-slate-500 dark:text-slate-400 mt-1">Overview of everything owed across your store.</p>
+          <h1 class="text-xl xl:text-2xl font-bold text-slate-900 dark:text-slate-100">Dashboard</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Overview of everything owed across your store.</p>
         </div>
         <div class="flex items-center gap-2.5 shrink-0">
-          <NuxtLink to="/people?new=1" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1.5">
+          <NuxtLink to="/people?new=1" class="rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold px-3.5 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1.5">
             <Plus :size="16" /> Customer
           </NuxtLink>
-          <NuxtLink to="/products?new=1" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1.5">
+          <NuxtLink to="/products?new=1" class="rounded-lg border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 font-semibold px-3.5 py-2 text-sm hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-1.5">
             <Plus :size="16" /> Product
           </NuxtLink>
           <button
             @click="showQuickAdd = true"
-            class="rounded-xl bg-emerald-600 text-white font-semibold px-4 py-2.5 text-sm hover:opacity-90 flex items-center gap-1.5 shadow-sm shadow-emerald-600/30"
+            class="rounded-lg bg-emerald-600 text-white font-semibold px-3.5 py-2 text-sm hover:opacity-90 flex items-center gap-1.5 shadow-sm shadow-emerald-600/30"
           >
             <Plus :size="16" /> New Utang
           </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-4 gap-4">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-slate-500 dark:text-slate-400">Total outstanding</p>
-            <span class="w-9 h-9 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center"><Wallet2 :size="16" /></span>
+      <div class="grid grid-cols-4 gap-3">
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Total outstanding</p>
+            <span class="w-7 h-7 rounded-full bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0"><Wallet2 :size="14" /></span>
           </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-3">{{ formatCurrency(totalOutstanding) }}</p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">{{ activeDebtorCount }} {{ activeDebtorCount === 1 ? 'customer' : 'customers' }} with active utang</p>
+          <p class="text-lg xl:text-xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">{{ formatCurrency(totalOutstanding) }}</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{{ activeDebtorCount }} {{ activeDebtorCount === 1 ? 'customer' : 'customers' }} with active utang</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-slate-500 dark:text-slate-400">Tinda</p>
-            <span class="w-9 h-9 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"><ShoppingCart :size="16" /></span>
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Tinda</p>
+            <span class="w-7 h-7 rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"><ShoppingCart :size="14" /></span>
           </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-3">{{ formatCurrency(byCategory.tinda) }}</p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Goods on credit</p>
+          <p class="text-lg xl:text-xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">{{ formatCurrency(byCategory.tinda) }}</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Goods on credit</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-slate-500 dark:text-slate-400">Cash</p>
-            <span class="w-9 h-9 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center"><Banknote :size="16" /></span>
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs text-slate-500 dark:text-slate-400">Cash</p>
+            <span class="w-7 h-7 rounded-full bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0"><Banknote :size="14" /></span>
           </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-3">{{ formatCurrency(byCategory.cash) }}</p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Cash loans</p>
+          <p class="text-lg xl:text-xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">{{ formatCurrency(byCategory.cash) }}</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Cash loans</p>
         </div>
-        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
-          <div class="flex items-center justify-between">
-            <p class="text-sm text-slate-500 dark:text-slate-400">GCash</p>
-            <span class="w-9 h-9 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center"><Smartphone :size="16" /></span>
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs text-slate-500 dark:text-slate-400">GCash</p>
+            <span class="w-7 h-7 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0"><Smartphone :size="14" /></span>
           </div>
-          <p class="text-2xl font-bold text-slate-900 dark:text-slate-100 mt-3">{{ formatCurrency(byCategory.gcash) }}</p>
-          <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">GCash loans</p>
+          <p class="text-lg xl:text-xl font-bold text-slate-900 dark:text-slate-100 mt-1.5">{{ formatCurrency(byCategory.gcash) }}</p>
+          <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">GCash loans</p>
         </div>
       </div>
     </div>

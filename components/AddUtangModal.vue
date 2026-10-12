@@ -1,12 +1,12 @@
 <template>
   <Modal
     :model-value="modelValue"
-    :title="personId ? 'Add Utang' : 'Quick Add Utang'"
+    :title="isEditMode ? 'Edit Utang' : personId ? 'Add Utang' : 'Quick Add Utang'"
     :no-body-scroll="true"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <!-- Customer picker, only shown in quick-add mode (no fixed personId prop) -->
-    <div v-if="!personId" class="shrink-0 mb-3">
+    <!-- Customer picker, only shown in quick-add mode (no fixed personId prop, not editing) -->
+    <div v-if="!personId && !isEditMode" class="shrink-0 mb-3">
       <div v-if="!selectedPersonId">
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Customer *</label>
         <input
@@ -47,14 +47,28 @@
         </button>
       </div>
 
-      <div class="shrink-0 mb-3">
-        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Due date <span class="text-slate-400 font-normal">(optional)</span></label>
-        <input
-          v-model="dueDate"
-          type="date"
-          class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500"
-        />
+      <div class="shrink-0 mb-3 grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Date of utang</label>
+          <input
+            v-model="utangDate"
+            type="date"
+            :max="todayInputValue"
+            class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500"
+          />
+        </div>
+        <div>
+          <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Due date <span class="text-slate-400 font-normal">(optional)</span></label>
+          <input
+            v-model="dueDate"
+            type="date"
+            class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500"
+          />
+        </div>
       </div>
+      <p class="shrink-0 -mt-2 mb-3 text-[11px] text-slate-400 dark:text-slate-500">
+        Defaults to today — backdate it to log an old utang.
+      </p>
 
       <!-- Tinda -->
       <form v-if="type === 'tinda'" @submit.prevent="submitTinda" class="flex-1 min-h-0 flex flex-col">
@@ -92,8 +106,9 @@
         <div v-if="sortedFilteredProducts.length === 0" class="text-sm text-slate-400 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 text-center shrink-0">
           {{ activeProducts.length === 0 ? 'No products yet — add one above.' : 'No products match your search.' }}
         </div>
-        <!-- Fills the remaining modal height instead of a fixed cap, so more rows show on taller screens -->
-        <div v-else class="flex-1 min-h-[140px] overflow-y-auto pr-0.5 space-y-2">
+        <!-- Fills the remaining modal height instead of a fixed cap, so more rows show on taller screens.
+             min-h-0 (not a fixed min) lets it shrink so the pinned footer/date fields never get clipped. -->
+        <div v-else class="flex-1 min-h-0 overflow-y-auto pr-0.5 space-y-2">
           <div v-for="p in sortedFilteredProducts" :key="p.id" class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 rounded-xl px-3 py-2">
             <div class="min-w-0">
               <p class="text-sm font-medium truncate dark:text-slate-100">{{ p.name }}</p>
@@ -125,9 +140,14 @@
             <span class="text-sm font-medium text-emerald-800 dark:text-emerald-300">Total</span>
             <span class="font-bold text-emerald-800 dark:text-emerald-300">{{ formatCurrency(tindaTotal) }}</span>
           </div>
-          <button type="submit" :disabled="saving || tindaTotal <= 0" class="w-full rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
-            {{ saving ? 'Saving…' : 'Save utang' }}
-          </button>
+          <div class="flex gap-2">
+            <button type="submit" :disabled="saving || tindaTotal <= 0" class="flex-1 rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
+              {{ saving ? 'Saving…' : isEditMode ? 'Save changes' : 'Save utang' }}
+            </button>
+            <button v-if="!isEditMode" type="button" @click="finishAdding" class="shrink-0 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 font-semibold px-5 py-3 active:bg-slate-50 dark:active:bg-slate-700">
+              Done
+            </button>
+          </div>
         </div>
       </form>
 
@@ -166,9 +186,14 @@
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Note</label>
           <input v-model="cash.note" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         </div>
-        <button type="submit" :disabled="saving || !cash.amount" class="w-full rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
-          {{ saving ? 'Saving…' : 'Save utang' }}
-        </button>
+        <div class="flex gap-2">
+          <button type="submit" :disabled="saving || !cash.amount" class="flex-1 rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
+            {{ saving ? 'Saving…' : isEditMode ? 'Save changes' : 'Save utang' }}
+          </button>
+          <button v-if="!isEditMode" type="button" @click="finishAdding" class="shrink-0 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 font-semibold px-5 py-3 active:bg-slate-50 dark:active:bg-slate-700">
+            Done
+          </button>
+        </div>
       </form>
 
       <!-- GCash -->
@@ -211,24 +236,37 @@
           <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Note</label>
           <input v-model="gcash.note" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
         </div>
-        <button type="submit" :disabled="saving || !gcash.amount" class="w-full rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
-          {{ saving ? 'Saving…' : 'Save utang' }}
-        </button>
+        <div class="flex gap-2">
+          <button type="submit" :disabled="saving || !gcash.amount" class="flex-1 rounded-xl bg-emerald-600 text-white font-semibold py-3 active:opacity-80 disabled:opacity-50">
+            {{ saving ? 'Saving…' : isEditMode ? 'Save changes' : 'Save utang' }}
+          </button>
+          <button v-if="!isEditMode" type="button" @click="finishAdding" class="shrink-0 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-300 font-semibold px-5 py-3 active:bg-slate-50 dark:active:bg-slate-700">
+            Done
+          </button>
+        </div>
       </form>
     </div>
   </Modal>
+
+  <ConfirmDialog
+    v-model="showConfirmEdit"
+    title="Save changes?"
+    message="This will update the existing utang record for this customer, including its amount and history."
+    confirm-label="Save changes"
+    @confirm="confirmEditSave"
+  />
 </template>
 
 <script setup lang="ts">
 import { Star, Minus, Plus } from 'lucide-vue-next'
-import type { UtangType, TindaLineItem } from '~/types'
+import type { Utang, UtangType, TindaLineItem } from '~/types'
 
-const props = defineProps<{ modelValue: boolean; personId?: string }>()
+const props = defineProps<{ modelValue: boolean; personId?: string; editUtang?: Utang | null }>()
 const emit = defineEmits<{ 'update:modelValue': [boolean]; saved: [] }>()
 
 const { activeProducts, init: initProducts, addProduct, toggleFavorite: toggleProductFavorite } = useProducts()
 const { activePeople, init: initPeople } = usePeople()
-const { addUtang } = useUtangs()
+const { addUtang, updateUtangFull } = useUtangs()
 const { formatCurrency } = useUtangCalc()
 const toast = useToast()
 const { clear: clearDraft } = useDraftStorage()
@@ -237,6 +275,8 @@ onMounted(() => {
   initProducts()
   initPeople()
 })
+
+const isEditMode = computed(() => !!props.editUtang)
 
 const types: { value: UtangType; label: string }[] = [
   { value: 'tinda', label: 'Tinda' },
@@ -261,9 +301,15 @@ function clearPerson() {
   selectedPersonId.value = ''
   personSearch.value = ''
 }
-const resolvedPersonId = computed(() => props.personId || selectedPersonId.value)
+const resolvedPersonId = computed(() => props.editUtang?.personId || props.personId || selectedPersonId.value)
 
-// Due date (shared across all utang types)
+// Date of utang + due date (shared across all utang types)
+function toDateInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+const todayInputValue = toDateInputValue(new Date())
+const utangDate = ref(todayInputValue)
 const dueDate = ref('')
 
 // Product search + inline quick-add. Favorites always float to the top.
@@ -295,7 +341,7 @@ async function saveInlineProduct() {
   }
 }
 
-// Draft (persists typed-but-unsaved input across accidental closes)
+// Draft (persists typed-but-unsaved input across accidental closes) — not used while editing
 const draftKey = computed(() => (props.personId ? `utang-add:${props.personId}` : 'utang-quick-add'))
 
 const type = ref<UtangType>('tinda')
@@ -321,6 +367,7 @@ const gcash = reactive({
 
 const draftState = reactive({
   type,
+  utangDate,
   dueDate,
   qty,
   tindaNote,
@@ -348,6 +395,7 @@ function attachDraft() {
   const existing = useDraftStorage().load<any>(draftKey.value)
   if (existing) {
     type.value = existing.type ?? type.value
+    utangDate.value = existing.utangDate ?? todayInputValue
     dueDate.value = existing.dueDate ?? ''
     Object.keys(qty).forEach((k) => delete qty[k])
     Object.assign(qty, existing.qty || {})
@@ -367,11 +415,47 @@ function attachDraft() {
   )
 }
 
+// Pre-fills every field from the utang being edited. Type is left editable — "everything" is editable.
+function loadFromUtang(u: Utang) {
+  type.value = u.type
+  utangDate.value = toDateInputValue(new Date(u.createdAt))
+  dueDate.value = u.dueDate ? toDateInputValue(new Date(u.dueDate)) : ''
+  Object.keys(qty).forEach((k) => delete qty[k])
+  for (const item of u.items || []) {
+    qty[item.productId] = item.quantity
+  }
+  tindaNote.value = u.type === 'tinda' ? u.note || '' : ''
+  const hasInterest = !!(u.interestType && u.interestValue && u.interestFrequency)
+  Object.assign(cash, {
+    amount: u.type === 'cash' ? u.amount : undefined,
+    hasInterest: u.type === 'cash' && hasInterest,
+    interestType: u.interestType || 'percentage',
+    interestValue: u.interestValue || 0,
+    interestFrequency: u.interestFrequency || 'month',
+    note: u.type === 'cash' ? u.note || '' : ''
+  })
+  Object.assign(gcash, {
+    amount: u.type === 'gcash' ? u.amount : undefined,
+    gcashNumber: u.gcashNumber || '',
+    hasInterest: u.type === 'gcash' && hasInterest,
+    interestType: u.interestType || 'percentage',
+    interestValue: u.interestValue || 0,
+    interestFrequency: u.interestFrequency || 'month',
+    note: u.type === 'gcash' ? u.note || '' : ''
+  })
+}
+
 watch(
   () => props.modelValue,
   (open) => {
-    if (open) attachDraft()
-    else {
+    if (open) {
+      if (props.editUtang) loadFromUtang(props.editUtang)
+      else attachDraft()
+    } else {
+      if (stopDraftWatch) {
+        stopDraftWatch()
+        stopDraftWatch = null
+      }
       productSearch.value = ''
       showInlineAddProduct.value = false
     }
@@ -389,10 +473,34 @@ const tindaTotal = computed(() =>
   activeProducts.value.reduce((sum, p) => sum + (qty[p.id] || 0) * p.price, 0)
 )
 
+function utangDateTimestamp(): number {
+  if (!utangDate.value) return Date.now()
+  const now = new Date()
+  const [y, m, d] = utangDate.value.split('-').map(Number)
+  return new Date(y || now.getFullYear(), (m || 1) - 1, d || 1, now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()).getTime()
+}
+
 function dueDateTimestamp(): number | undefined {
   if (!dueDate.value) return undefined
   const ts = new Date(`${dueDate.value}T00:00:00`).getTime()
   return Number.isNaN(ts) ? undefined : ts
+}
+
+// Edits require an explicit confirmation before writing to Firestore.
+const showConfirmEdit = ref(false)
+let pendingAction: (() => Promise<void>) | null = null
+function requestSubmit(action: () => Promise<void>) {
+  if (isEditMode.value) {
+    pendingAction = action
+    showConfirmEdit.value = true
+  } else {
+    action()
+  }
+}
+async function confirmEditSave() {
+  const action = pendingAction
+  pendingAction = null
+  if (action) await action()
 }
 
 async function submitTinda() {
@@ -401,13 +509,30 @@ async function submitTinda() {
     .filter((p) => (qty[p.id] || 0) > 0)
     .map((p) => ({ productId: p.id, productName: p.name, unitPrice: p.price, quantity: qty[p.id] || 0 }))
   if (items.length === 0) return
+  requestSubmit(() => saveTinda(items))
+}
+
+async function saveTinda(items: TindaLineItem[]) {
   saving.value = true
   try {
-    await addUtang({ personId: resolvedPersonId.value, type: 'tinda', amount: tindaTotal.value, items, note: tindaNote.value, dueDate: dueDateTimestamp() })
-    toast.success('Utang added')
-    resetAndClose()
+    if (isEditMode.value && props.editUtang) {
+      await updateUtangFull(props.editUtang.id, {
+        type: 'tinda',
+        amount: tindaTotal.value,
+        items,
+        note: tindaNote.value,
+        dueDate: dueDateTimestamp(),
+        createdAt: utangDateTimestamp()
+      })
+      toast.success('Utang updated')
+      finishEditing()
+    } else {
+      await addUtang({ personId: resolvedPersonId.value, type: 'tinda', amount: tindaTotal.value, items, note: tindaNote.value, dueDate: dueDateTimestamp(), createdAt: utangDateTimestamp() })
+      toast.success('Utang added')
+      resetEntryFields('tinda')
+    }
   } catch {
-    toast.error('Could not save utang')
+    toast.error(isEditMode.value ? 'Could not update utang' : 'Could not save utang')
   } finally {
     saving.value = false
   }
@@ -415,22 +540,41 @@ async function submitTinda() {
 
 async function submitCash() {
   if (!resolvedPersonId.value || !cash.amount) return
+  requestSubmit(saveCash)
+}
+
+async function saveCash() {
   saving.value = true
   try {
-    await addUtang({
-      personId: resolvedPersonId.value,
-      type: 'cash',
-      amount: cash.amount,
-      note: cash.note,
-      dueDate: dueDateTimestamp(),
-      ...(cash.hasInterest
-        ? { interestType: cash.interestType, interestValue: cash.interestValue, interestFrequency: cash.interestFrequency }
-        : {})
-    })
-    toast.success('Utang added')
-    resetAndClose()
+    const interestFields = cash.hasInterest
+      ? { interestType: cash.interestType, interestValue: cash.interestValue, interestFrequency: cash.interestFrequency }
+      : {}
+    if (isEditMode.value && props.editUtang) {
+      await updateUtangFull(props.editUtang.id, {
+        type: 'cash',
+        amount: cash.amount as number,
+        note: cash.note,
+        dueDate: dueDateTimestamp(),
+        createdAt: utangDateTimestamp(),
+        ...interestFields
+      })
+      toast.success('Utang updated')
+      finishEditing()
+    } else {
+      await addUtang({
+        personId: resolvedPersonId.value,
+        type: 'cash',
+        amount: cash.amount as number,
+        note: cash.note,
+        dueDate: dueDateTimestamp(),
+        createdAt: utangDateTimestamp(),
+        ...interestFields
+      })
+      toast.success('Utang added')
+      resetEntryFields('cash')
+    }
   } catch {
-    toast.error('Could not save utang')
+    toast.error(isEditMode.value ? 'Could not update utang' : 'Could not save utang')
   } finally {
     saving.value = false
   }
@@ -438,39 +582,80 @@ async function submitCash() {
 
 async function submitGcash() {
   if (!resolvedPersonId.value || !gcash.amount) return
+  requestSubmit(saveGcash)
+}
+
+async function saveGcash() {
   saving.value = true
   try {
-    await addUtang({
-      personId: resolvedPersonId.value,
-      type: 'gcash',
-      amount: gcash.amount,
-      gcashNumber: gcash.gcashNumber,
-      note: gcash.note,
-      dueDate: dueDateTimestamp(),
-      ...(gcash.hasInterest
-        ? { interestType: gcash.interestType, interestValue: gcash.interestValue, interestFrequency: gcash.interestFrequency }
-        : {})
-    })
-    toast.success('Utang added')
-    resetAndClose()
+    const interestFields = gcash.hasInterest
+      ? { interestType: gcash.interestType, interestValue: gcash.interestValue, interestFrequency: gcash.interestFrequency }
+      : {}
+    if (isEditMode.value && props.editUtang) {
+      await updateUtangFull(props.editUtang.id, {
+        type: 'gcash',
+        amount: gcash.amount as number,
+        gcashNumber: gcash.gcashNumber,
+        note: gcash.note,
+        dueDate: dueDateTimestamp(),
+        createdAt: utangDateTimestamp(),
+        ...interestFields
+      })
+      toast.success('Utang updated')
+      finishEditing()
+    } else {
+      await addUtang({
+        personId: resolvedPersonId.value,
+        type: 'gcash',
+        amount: gcash.amount as number,
+        gcashNumber: gcash.gcashNumber,
+        note: gcash.note,
+        dueDate: dueDateTimestamp(),
+        createdAt: utangDateTimestamp(),
+        ...interestFields
+      })
+      toast.success('Utang added')
+      resetEntryFields('gcash')
+    }
   } catch {
-    toast.error('Could not save utang')
+    toast.error(isEditMode.value ? 'Could not update utang' : 'Could not save utang')
   } finally {
     saving.value = false
   }
 }
 
-function resetAndClose() {
+// Clears only the fields for the type just saved — person, date, and due date are kept so the
+// same customer/date can keep receiving new entries without the modal closing in between.
+function resetEntryFields(t: UtangType) {
+  if (t === 'tinda') {
+    Object.keys(qty).forEach((k) => delete qty[k])
+    tindaNote.value = ''
+    productSearch.value = ''
+    showInlineAddProduct.value = false
+  } else if (t === 'cash') {
+    Object.assign(cash, { amount: undefined, hasInterest: false, interestType: 'percentage', interestValue: 0, interestFrequency: 'month', note: '' })
+  } else {
+    Object.assign(gcash, { amount: undefined, hasInterest: false, interestType: 'percentage', interestValue: 0, interestFrequency: 'month', note: '' })
+  }
+}
+
+// "Done" button in add mode — fully resets and closes.
+function finishAdding() {
   clearDraft(draftKey.value)
+  utangDate.value = todayInputValue
   dueDate.value = ''
-  Object.keys(qty).forEach((k) => delete qty[k])
-  tindaNote.value = ''
-  Object.assign(cash, { amount: undefined, hasInterest: false, interestType: 'percentage', interestValue: 0, interestFrequency: 'month', note: '' })
-  Object.assign(gcash, { amount: undefined, gcashNumber: '', hasInterest: false, interestType: 'percentage', interestValue: 0, interestFrequency: 'month', note: '' })
+  resetEntryFields('tinda')
+  resetEntryFields('cash')
+  resetEntryFields('gcash')
+  gcash.gcashNumber = ''
   selectedPersonId.value = ''
   personSearch.value = ''
-  productSearch.value = ''
-  showInlineAddProduct.value = false
+  emit('saved')
+  emit('update:modelValue', false)
+}
+
+// After a successful edit, just close — editing is a one-off action, not a batch-add flow.
+function finishEditing() {
   emit('saved')
   emit('update:modelValue', false)
 }

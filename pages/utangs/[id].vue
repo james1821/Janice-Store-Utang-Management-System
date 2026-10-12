@@ -24,7 +24,12 @@
       <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold uppercase text-slate-500 dark:text-slate-400">{{ utang.type }} utang</span>
-          <span class="text-[11px] uppercase font-semibold px-2 py-1 rounded-full" :class="statusClass(utang.status)">{{ utang.status }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] uppercase font-semibold px-2 py-1 rounded-full" :class="statusClass(utang.status)">{{ utang.status }}</span>
+            <button type="button" @click="showEditUtang = true" class="text-slate-400 dark:text-slate-500 w-7 h-7 flex items-center justify-center rounded-full active:bg-slate-100 dark:active:bg-slate-700 lg:hover:bg-slate-100 lg:dark:hover:bg-slate-700" aria-label="Edit utang">
+              <Pencil :size="15" />
+            </button>
+          </div>
         </div>
 
         <div class="space-y-1.5 text-sm">
@@ -96,12 +101,15 @@
         </div>
       </div>
 
-      <div v-if="utang.status !== 'paid'" class="flex gap-2">
-        <button @click="showPayment = true" class="flex-1 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-semibold py-3 active:opacity-80 lg:hover:opacity-90 flex items-center justify-center gap-1.5">
+      <div class="flex gap-2">
+        <button v-if="utang.status !== 'paid'" @click="showPayment = true" class="flex-1 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-sm font-semibold py-3 active:opacity-80 lg:hover:opacity-90 flex items-center justify-center gap-1.5">
           <Banknote :size="16" /> Record payment
         </button>
-        <button @click="confirmMarkPaid = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5">
+        <button v-if="utang.status !== 'paid'" @click="confirmMarkPaid = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5">
           <CheckCircle2 :size="16" /> Mark paid
+        </button>
+        <button @click="showEditUtang = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5" :class="utang.status === 'paid' ? 'flex-1' : ''">
+          <Pencil :size="16" /> Edit utang
         </button>
       </div>
     </div>
@@ -124,6 +132,7 @@
     </div>
 
     <PaymentModal v-model="showPayment" :utang="utang" />
+    <AddUtangModal v-model="showEditUtang" :edit-utang="utang" />
 
     <ConfirmDialog
       v-model="confirmMarkPaid"
@@ -138,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, User, ChevronRight, CalendarClock, Banknote, CheckCircle2 } from 'lucide-vue-next'
+import { ArrowLeft, User, ChevronRight, CalendarClock, Banknote, CheckCircle2, Pencil } from 'lucide-vue-next'
 
 definePageMeta({ layout: 'default' })
 
@@ -211,6 +220,9 @@ async function saveDueDate() {
 
 // Payment
 const showPayment = ref(false)
+
+// Full edit (opens AddUtangModal in edit mode, pre-filled from this utang)
+const showEditUtang = ref(false)
 
 // Mark paid
 const confirmMarkPaid = ref(false)
