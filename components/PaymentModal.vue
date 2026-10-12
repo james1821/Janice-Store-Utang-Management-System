@@ -16,6 +16,16 @@
       </div>
 
       <div>
+        <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Payment date <span class="text-slate-400 font-normal">(optional)</span></label>
+        <input
+          v-model="paymentDate"
+          type="date"
+          :max="todayInputValue"
+          class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500"
+        />
+      </div>
+
+      <div>
         <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Note</label>
         <input v-model="note" class="mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 px-4 py-2.5 outline-none focus:border-emerald-500" />
       </div>
@@ -44,6 +54,14 @@ const { load, save, clear } = useDraftStorage()
 
 const amount = ref<number | undefined>(undefined)
 const note = ref('')
+
+function toDateInputValue(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+const todayInputValue = toDateInputValue(new Date())
+const paymentDate = ref(todayInputValue)
+
 const saving = ref(false)
 
 const outstanding = computed(() => (props.utang ? getOutstandingBalance(props.utang) : 0))
@@ -65,6 +83,7 @@ watch(
     const draft = load<{ amount?: number; note?: string }>(draftKey(u.id))
     amount.value = draft?.amount ?? getOutstandingBalance(u)
     note.value = draft?.note ?? ''
+    paymentDate.value = todayInputValue
     stopWatch = watch(
       [amount, note],
       ([a, n]) => save(draftKey(u.id), { amount: a, note: n }),
@@ -74,11 +93,25 @@ watch(
   { immediate: true }
 )
 
+watch(
+  () => props.modelValue,
+  (open) => {
+    if (open) paymentDate.value = todayInputValue
+  }
+)
+
+function paymentDateTimestamp(): number {
+  if (!paymentDate.value) return Date.now()
+  const now = new Date()
+  const [y, m, d] = paymentDate.value.split('-').map(Number)
+  return new Date(y || now.getFullYear(), (m || 1) - 1, d || 1, now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()).getTime()
+}
+
 async function submit() {
   if (!props.utang || !amount.value) return
   saving.value = true
   try {
-    await recordPayment(props.utang, amount.value, note.value)
+    await recordPayment(props.utang, amount.value, note.value, paymentDateTimestamp())
     clear(draftKey(props.utang.id))
     toast.success('Payment recorded')
     emit('saved')

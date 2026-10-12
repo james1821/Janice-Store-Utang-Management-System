@@ -30,7 +30,7 @@ export function usePayments() {
    * Records a payment against a specific utang and updates its paid/outstanding status.
    * Supports partial payments; caps the recorded amount at what's actually owed.
    */
-  async function recordPayment(utang: Utang, amount: number, note?: string) {
+  async function recordPayment(utang: Utang, amount: number, note?: string, createdAt?: number) {
     const outstanding = getOutstandingBalance(utang)
     const applied = Math.min(amount, outstanding)
     if (applied <= 0) return
@@ -40,7 +40,7 @@ export function usePayments() {
       utangId: utang.id,
       amount: applied,
       note: note || '',
-      createdAt: Date.now()
+      createdAt: createdAt ?? Date.now()
     })
 
     const newAmountPaid = +(utang.amountPaid + applied).toFixed(2)
