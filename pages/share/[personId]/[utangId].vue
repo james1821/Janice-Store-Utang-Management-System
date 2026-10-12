@@ -103,14 +103,22 @@ const route = useRoute()
 const personId = route.params.personId as string
 const utangId = route.params.utangId as string
 
-const { utangs, payments, loading, notFound, load } = usePublicShare()
+const { person, utangs, payments, loading, notFound, load } = usePublicShare()
 const { formatCurrency, formatDateTime, formatDate, calculateAccruedInterest, getDueStatus, interestFrequencyLabel } = useUtangCalc()
+
+const utang = computed(() => utangs.value.find((u) => u.id === utangId) || null)
+
+useHead({
+  title: () => {
+    if (!person.value) return 'Utang detail'
+    return `${person.value.fullName} · ${utang.value ? `${utang.value.type} utang` : 'Utang detail'}`
+  }
+})
 
 onMounted(() => {
   load(personId)
 })
 
-const utang = computed(() => utangs.value.find((u) => u.id === utangId) || null)
 const utangPayments = computed(() => payments.value.filter((p) => p.utangId === utangId).sort((a, b) => b.createdAt - a.createdAt))
 
 const hasInterest = computed(() => !!(utang.value?.interestType && utang.value?.interestValue && utang.value?.interestFrequency))
