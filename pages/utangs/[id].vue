@@ -103,13 +103,13 @@
 
       <div class="flex gap-2">
         <button v-if="utang.status !== 'paid'" @click="showPayment = true" class="flex-1 rounded-xl bg-emerald-600 text-white text-sm font-semibold py-3 active:opacity-80 lg:hover:opacity-90 flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-600/30">
-          <Banknote :size="16" /> Record payment
+          Record payment
         </button>
         <button v-if="utang.status !== 'paid'" @click="confirmMarkPaid = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5">
-          <CheckCircle2 :size="16" /> Mark paid
+          Mark paid
         </button>
         <button @click="showEditUtang = true" class="rounded-xl border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 text-sm font-semibold py-3 px-4 active:bg-slate-50 dark:active:bg-slate-700 lg:hover:bg-slate-50 lg:dark:hover:bg-slate-700 flex items-center justify-center gap-1.5" :class="utang.status === 'paid' ? 'flex-1' : ''">
-          <Pencil :size="16" /> Edit utang
+          Edit utang
         </button>
       </div>
     </div>
@@ -166,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeft, User, ChevronRight, CalendarClock, Banknote, CheckCircle2, Pencil, Trash2 } from 'lucide-vue-next'
+import { ArrowLeft, User, ChevronRight, CalendarClock, Pencil, Trash2 } from 'lucide-vue-next'
 import type { Payment } from '~/types'
 
 definePageMeta({ layout: 'default' })
